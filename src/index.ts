@@ -1,4 +1,5 @@
-import { connection, server as WebSocketServer } from "websocket";
+import websocketPkg from "websocket";
+const { connection, server: WebSocketServer } = websocketPkg;
 import http from "http";
 import {
   SupportedMessage as OutgoingSupportingMessage,
@@ -26,7 +27,7 @@ server.listen(8080, function () {
 
 const wsServer = new WebSocketServer({
   httpServer: server,
-  autoAcceptConnections: false,
+  autoAcceptConnections: true,
 });
 
 function originIsAllowed(origin: string) {
@@ -65,7 +66,10 @@ wsServer.on("request", function (request) {
 //type => JOIN_ROOM, message => InitMessage
 //type => SEND_MESSAGE, message => UserMessage
 //type =>  UPVOTE_MESSAGE, message => UpvoteMessage
-function messageHandler(ws: connection, message: IncomingMessage) {
+function messageHandler(
+  ws: typeof websocketPkg.connection.prototype,
+  message: IncomingMessage
+) {
   if (message.type == SupportedMessage.JoinRoom) {
     const payload = message.payload;
     userManager.addUser(payload.name, payload.userId, payload.roomId, ws);
