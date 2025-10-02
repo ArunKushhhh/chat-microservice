@@ -23,6 +23,9 @@ export class UserManager {
     this.rooms
       .get(roomId)
       ?.users.push({ name, id: userId, connection: socket });
+    socket.on("close", (reasonCode, description) => {
+      this.removeUser(userId, roomId);
+    });
   }
 
   removeUser(userId: string, roomId: string) {
@@ -30,6 +33,7 @@ export class UserManager {
     if (users) {
       users.filter(({ id }) => id !== userId);
     }
+    console.log("user removed from the room.");
   }
 
   getUser(userId: string, roomId: string): User | null {
@@ -49,7 +53,11 @@ export class UserManager {
       return;
     }
 
-    room.users.forEach(({ connection }) => {
+    room.users.forEach(({ connection, id }) => {
+      if (id === userId) {
+        return;
+      }
+      console.log("Outgoing message " + JSON.stringify(message));
       connection.sendUTF(message);
     });
   }
